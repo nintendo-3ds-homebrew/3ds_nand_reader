@@ -21,7 +21,7 @@ char	*seekDevice(void)
 	directory = opendir("/dev");
 	if (!directory)
 		err(EXIT_FAILURE, "opendir error");
-	while (st_directory = readdir(directory))
+	while ((st_directory = readdir(directory)))
 	{
 		if (!(st_directory->d_type ^ DT_BLK) && st_directory->d_ino > inode)
 		{
@@ -30,6 +30,50 @@ char	*seekDevice(void)
 		}
 	}
 	return (block_name);
+}
+
+void	dumpNand(char *device)
+{
+	auto int		fd_file = 0;
+	auto int		fd_device = 0;
+	auto char		buff[4096] = {0};
+	auto off_t		nandSize = 0;
+	auto ssize_t	size = 0;
+
+	fd_device = open(device, O_RDONLY);
+	if (fd_device == -1)
+		err(EXIT_FAILURE, "open device");
+
+	nandSize = lseek(fd_device, 0, SEEK_END);
+	if (nandSize == -1)
+		err(EXIT_FAILURE, "lseek");
+
+	if (lseek(fd_device, (off_t)0, SEEK_SET) == -1)
+		err(EXIT_FAILURE, "lseek");
+
+	fd_file = open("./dump/nand", O_RDWR | O_CREAT | O_TRUNC, 0666);
+	if (fd_file == -1)
+		err(EXIT_FAILURE, "open nand file");
+
+	while (nandSize)
+	{
+		printf("%d              \r", nandSize);
+		size = read(fd_device, &buff, 4096);
+		if (size == -1)
+			err(EXIT_FAILURE, "read");
+		if (write(fd_file, &buff, size) == -1)
+			err(EXIT_FAILURE, "write");
+		nandSize -= 4096;
+	}
+	printf("\rFinish\n");
+}
+
+void	prepareDump(void)
+{
+	auto struct stat st = {0};
+
+	if (stat("./dump", &st) == -1)
+		mkdir("./dump", 0666);
 }
 
 int	main(int argc, char **argv)
@@ -41,5 +85,10 @@ int	main(int argc, char **argv)
 	getchar();
 
 	device = concat("/dev/", seekDevice());
+
+	printf("Device name : %s\n", device);
+
+	prepareDump();
+	dumpNand(device);
 	free(device);
 }

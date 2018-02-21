@@ -16,6 +16,7 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	@$(CC) $(FLAG) -o $(NAME) $(OBJS) $(LFT)
 	@printf "✅  Compilation done.\n"
+	#@chmod u+s ./3ds_nand_reader
 
 %.o : %.c $(RELINK) ./Makefile
 	@printf " ✅                                                              \r"
@@ -26,13 +27,11 @@ clean:
 	@printf "                                                               \r"
 	@printf "✅  clean done !\n"
 	@rm -f $(OBJS)
-	@make -s clean -C ./libft/
 
 fclean:
 	@printf "                                                               \r"
 	@printf "✅  fclean done !\n"
 	@rm -f $(NAME) $(OBJS)
-	@make -s fclean -C ./libft/
 
 re: fclean all
 

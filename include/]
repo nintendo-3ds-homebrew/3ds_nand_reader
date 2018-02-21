@@ -9,7 +9,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <err.h>
-#include <unistd.h>
 
 char	*seekDevice(void);
 char	*concat(char *s1, char *s2);
