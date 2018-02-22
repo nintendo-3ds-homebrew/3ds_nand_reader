@@ -32,17 +32,33 @@ char	*seekDevice(void)
 	return (block_name);
 }
 
-void	dumpNand(char *device)
+bool	is3ds(int fd_device)
 {
-	auto int		fd_file = 0;
-	auto int		fd_device = 0;
-	auto char		buff[4096] = {0};
-	auto off_t		nandSize = 0;
-	auto ssize_t	size = 0;
+	auto char		buff[5] = {0};
 
-	fd_device = open(device, O_RDONLY);
-	if (fd_device == -1)
-		err(EXIT_FAILURE, "open device");
+	if (lseek(fd_device, (off_t)0x100, SEEK_SET) == -1)
+		err(EXIT_FAILURE, "lseek");
+
+	if (read(fd_device, &buff, 4) == -1)
+		errx(EXIT_FAILURE, "lseek");
+
+	if (strcmp(buff, "NCSD"))
+	{
+		printf("3ds not found\n");
+		return(false);
+	}
+	else
+		printf("3DS found\nDump start\n");
+
+	if (lseek(fd_device, (off_t)0, SEEK_SET) == -1)
+		err(EXIT_FAILURE, "lseek");
+
+	return(true);
+}
+
+ssize_t	getNandSize(int fd_device)
+{
+	ssize_t	nandSize = 0;
 
 	nandSize = lseek(fd_device, 0, SEEK_END);
 	if (nandSize == -1)
@@ -51,21 +67,42 @@ void	dumpNand(char *device)
 	if (lseek(fd_device, (off_t)0, SEEK_SET) == -1)
 		err(EXIT_FAILURE, "lseek");
 
+	return (nandSize);
+}
+
+bool	dumpNand(char *device)
+{
+	auto int		fd_file = 0;
+	auto int		fd_device = 0;
+	auto char		buff[BUFF_SIZE] = {0};
+	auto off_t		nandSize = 0;
+	auto ssize_t	size = 0;
+
+	fd_device = open(device, O_RDONLY);
+	if (fd_device == -1)
+		err(EXIT_FAILURE, "open device");
+
+	nandSize = getNandSize(fd_device);
+
+	if (is3ds(fd_device) == false)
+		return (false);
+
 	fd_file = open("./dump/nand", O_RDWR | O_CREAT | O_TRUNC, 0666);
 	if (fd_file == -1)
 		err(EXIT_FAILURE, "open nand file");
 
 	while (nandSize)
 	{
-		printf("%d              \r", nandSize);
-		size = read(fd_device, &buff, 4096);
+		printf("%lu              \r", nandSize);
+		size = read(fd_device, &buff, (ssize_t)BUFF_SIZE);
 		if (size == -1)
 			err(EXIT_FAILURE, "read");
-		if (write(fd_file, &buff, size) == -1)
+		if (write(fd_file, &buff, (size_t)size) == -1)
 			err(EXIT_FAILURE, "write");
-		nandSize -= 4096;
+		nandSize -= BUFF_SIZE;
 	}
 	printf("\rFinish\n");
+	return (true);
 }
 
 void	prepareDump(void)
@@ -76,12 +113,11 @@ void	prepareDump(void)
 		mkdir("./dump", 0666);
 }
 
-int	main(int argc, char **argv)
+int	main(/*int argc, char **argv*/)
 {
 	auto char	*device = NULL;
 
 	printf("Plug your 3ds now, then press a key\n");
-
 	getchar();
 
 	device = concat("/dev/", seekDevice());
@@ -91,4 +127,6 @@ int	main(int argc, char **argv)
 	prepareDump();
 	dumpNand(device);
 	free(device);
+
+	return (0);
 }
