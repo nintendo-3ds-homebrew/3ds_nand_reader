@@ -36,7 +36,7 @@ bool	is3ds(int fd_device)
 {
 	auto char		buff[5] = {0};
 
-	if (lseek(fd_device, (off_t)0x100, SEEK_SET) == -1)
+	if (lseek(fd_device, (off_t)0x100, SEEK_SET) == -1) // go to offset  0x100 for checking NSCD
 		err(EXIT_FAILURE, "lseek");
 
 	if (read(fd_device, &buff, 4) == -1)
@@ -44,11 +44,11 @@ bool	is3ds(int fd_device)
 
 	if (strcmp(buff, "NCSD"))
 	{
-		printf("3ds not found\n");
+		printf("%s3ds not found%s\n", RED, END);
 		return(false);
 	}
 	else
-		printf("3DS found\nDump start\n");
+		printf("%s3DS found\nDump start%s\n", GREEN, END);
 
 	if (lseek(fd_device, (off_t)0, SEEK_SET) == -1)
 		err(EXIT_FAILURE, "lseek");
@@ -60,17 +60,32 @@ ssize_t	getNandSize(int fd_device)
 {
 	ssize_t	nandSize = 0;
 
-	nandSize = lseek(fd_device, 0, SEEK_END);
+	if (lseek(fd_device, (off_t)0, SEEK_SET) == -1) // Be sure we are at file start
+		err(EXIT_FAILURE, "lseek");
+
+	nandSize = lseek(fd_device, 0, SEEK_END); // Go to end of file to get size
 	if (nandSize == -1)
 		err(EXIT_FAILURE, "lseek");
 
-	if (lseek(fd_device, (off_t)0, SEEK_SET) == -1)
+	if (lseek(fd_device, (off_t)0, SEEK_SET) == -1) // return to start file
 		err(EXIT_FAILURE, "lseek");
 
 	return (nandSize);
 }
 
-bool	dumpNand(char *device)
+int	createNand(char *nandFile, off_t nandSize)
+{
+	auto int	fd = 0;
+
+	fd = open(nandFile, O_RDWR | O_CREAT | O_TRUNC, 0666);
+	if (fd == -1)
+		err(EXIT_FAILURE, "open nand file");
+	printf("%s created\nSize nand = %lu\n", nandFile, nandSize);
+
+	return (fd);
+}
+
+bool	dumpNand(char *device, uint8_t nbDump)
 {
 	auto int		fd_file = 0;
 	auto int		fd_device = 0;
@@ -82,26 +97,30 @@ bool	dumpNand(char *device)
 	if (fd_device == -1)
 		err(EXIT_FAILURE, "open device");
 
-	nandSize = getNandSize(fd_device);
-
 	if (is3ds(fd_device) == false)
 		return (false);
 
-	fd_file = open("./dump/nand", O_RDWR | O_CREAT | O_TRUNC, 0666);
-	if (fd_file == -1)
-		err(EXIT_FAILURE, "open nand file");
-
-	while (nandSize)
+	for (uint8_t i = 0; i < nbDump; i++)
 	{
-		printf("%lu              \r", nandSize);
-		size = read(fd_device, &buff, (ssize_t)BUFF_SIZE);
-		if (size == -1)
-			err(EXIT_FAILURE, "read");
-		if (write(fd_file, &buff, (size_t)size) == -1)
-			err(EXIT_FAILURE, "write");
-		nandSize -= BUFF_SIZE;
+		nandSize = getNandSize(fd_device);
+		if (i == 0)
+			fd_file = createNand("./dump/nand1", nandSize);
+		else
+			fd_file = createNand("./dump/nand2", nandSize);
+		while (nandSize)
+		{
+			printf("%sBytes left : %lu                 \r%s", GREEN, nandSize, END);
+			fflush(stdout);
+			size = read(fd_device, &buff, (ssize_t)BUFF_SIZE);
+			if (size == -1)
+				err(EXIT_FAILURE, "read");
+			if (write(fd_file, &buff, (size_t)size) == -1)
+				err(EXIT_FAILURE, "write");
+			nandSize -= size;
+		}
+		i == 0 ? printf("\n%sNand1 dump Success\n\n%s", GREEN, END):printf("\n%sNand2 dump Success\n\n%s", GREEN, END);
 	}
-	printf("\rFinish\n");
+	printf("%sFinish\n%s", GREEN, END);
 	return (true);
 }
 
@@ -113,19 +132,26 @@ void	prepareDump(void)
 		mkdir("./dump", 0666);
 }
 
-int	main(/*int argc, char **argv*/)
+void	usage(void)
+{
+	errx(EXIT_FAILURE, "Usage : ./3ds_nand_reader 1 (for one dump)\n\t\t\t\t ./3ds_nand_reader 2 (for two dumps)");
+}
+
+int	main(int argc, char **argv)
 {
 	auto char	*device = NULL;
 
-	printf("Plug your 3ds now, then press a key\n");
+	if (argc != 2)
+		usage();
+	printf("%sPlug your 3ds now, then press a key%s\n", YELLOW, END);
 	getchar();
 
 	device = concat("/dev/", seekDevice());
 
-	printf("Device name : %s\n", device);
+	printf("%sLast device plugged : %s\n%s", YELLOW, device, END);
 
 	prepareDump();
-	dumpNand(device);
+	dumpNand(device, (uint8_t)atoi(argv[1]));
 	free(device);
 
 	return (0);
