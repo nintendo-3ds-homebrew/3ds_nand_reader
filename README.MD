@@ -2,7 +2,7 @@
 
 Tool for dumping 3ds nand (For unix system).
 
-##Usage :
+## Usage :
 
 1) Dowload the tool here : https://github.com/SegFault42/3ds_nand_reader/releases/tag/v0.1
 
