@@ -26,6 +26,7 @@ ssize_t	getNandSize(int fd_device);
 bool	is3ds(int fd_device);
 bool	dumpNand(char *device, uint8_t nbNand);
 void	prepareDump(void);
+int	createNand(char *nandFile, off_t nandSize);
 void		usage(void);
 
 #endif
