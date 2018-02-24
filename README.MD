@@ -33,7 +33,7 @@ git clone https://github.com/SegFault42/3ds_nand_reader.git && cd 3ds_nand_reade
 
 If your `3DS` is not detected by the tool, please have a look at some  [known error codes](https://www.3dbrew.org/wiki/Bootloader#Error_Codes).
 you should see:
-```javascript
+```shell
  BOOTROM  8046
  ERRCODE: 00F800FE
           00000000 00000000
