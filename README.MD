@@ -1,48 +1,49 @@
+
 # 3ds_nand_reader
+This tool is provided to help you perform a `NAND dump` on your `3DS`
 
-Tool for dumping 3ds nand (For unix system).
+### Prerequisites
+* Unix system (Linux)
+## Installation
+You can either compile and install the tool from sources or directly download the binary.
+#### via sources
+```bash
+git clone https://github.com/SegFault42/3ds_nand_reader.git && cd 3ds_nand_reader && make
+```
+#### via direct download 
+1. download the latest version [3ds nand reader v0.1](https://github.com/SegFault42/3ds_nand_reader/releases/download/0.1/3ds_nand_reader.zip)
+2. unzip it
+3. open your terminal, go to `3ds_nand_validator` folder
 
-## Usage :
+## Usage
 
-1) Dowload the tool here : https://github.com/SegFault42/3ds_nand_reader/releases/tag/v0.1
-
-2) Extract 3ds_nand_reader from .zip in Desktop
-
-3) Open a terminal
-
-4) Go to the 3DS_nand_validator folder
+1. run the tool as root.
     ```bash
-    cd ~/Desktop/3ds_nand_reader
+    sudo ./3ds_nand_reader 1
     ```
-    
-5) Launch the tool as root 
     ```bash
-    sudo ./3ds_nand_reader 2
-    ```
-    ```bash
-    Usage : ./3ds_nand_reader 1 (for one dump)
-		    ./3ds_nand_reader 2 (for two dumps)
+    Usage : ./3ds_nand_reader 1 (one dump)
+		    ./3ds_nand_reader 2 (two dumps)
     ```
  
-6) Plug your card reader in your PC/Mac
+2. Plug your card reader in your computer.
 
-7) Press enter :)
+3.  Press enter :) 
+## Troubleshooting
 
-# Troubleshooting
-
-If your 3ds is not detected by the soft verify the error code :
-https://www.3dbrew.org/wiki/Bootloader#Error_Codes
-
-You should have :
-
-```bash
-    BOOTROM 8046
-    ERRCODE: 00F800FE
-            00000000 00000000
-            00000200 00400000
+If your `3DS` is not detected by the tool, please have a look at some  [known error codes](https://www.3dbrew.org/wiki/Bootloader#Error_Codes).
+you should see:
+```javascript
+ BOOTROM  8046
+ ERRCODE: 00F800FE
+          00000000 00000000
+          00000200 00400000
 ```
 
-Be sure to launch the soft first then plug the reader in your 3ds and then plug your sd reader in usb and press key.
+⚠️ **be sure to respect to following orders:** 
+1. Launch the tool
+2. Plug the reader in your `3DS`
+3. Plug your `SD reader` in usb.
+4. Press key.
 
-If you don't have a sd reader you can make your own by following this link :
-https://gbatemp.net/threads/tutorial-noob-friendly-nand-dumping-2ds-3ds-3ds-xl-n3ds-n3ds-xl.414498/
+If you do not have any `SD reader` you can make your own by following this [tutorial](https://gbatemp.net/threads/tutorial-noob-friendly-nand-dumping-2ds-3ds-3ds-xl-n3ds-n3ds-xl.414498/).
