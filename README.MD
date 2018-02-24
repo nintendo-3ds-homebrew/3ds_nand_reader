@@ -1,5 +1,6 @@
-
-![gif](https://github.com/SegFault42/3ds_nand_reader/blob/master/demo.gif?raw=true)
+<p align="center">
+    <img src="https://github.com/SegFault42/3ds_nand_reader/blob/master/demo.gif?raw=true">
+</p>
 
 # 3ds_nand_reader
 This tool is provided to help you perform a `NAND dump` on your `3DS`
