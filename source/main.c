@@ -34,15 +34,15 @@ char	*seekDevice(void)
 
 bool	is3ds(int fd_device)
 {
-	auto char		buff[5] = {0};
+	auto uint32_t		ncsd = 0;
 
 	if (lseek(fd_device, (off_t)0x100, SEEK_SET) == -1) // go to offset  0x100 for checking NSCD
 		err(EXIT_FAILURE, "lseek");
 
-	if (read(fd_device, &buff, 4) == -1)
+	if (read(fd_device, &ncsd, 4) == -1)
 		errx(EXIT_FAILURE, "lseek");
 
-	if (strcmp(buff, "NCSD"))
+	if (NCSD ^ ncsd)
 	{
 		printf("%s3ds not found%s\n", RED, END);
 		return(false);

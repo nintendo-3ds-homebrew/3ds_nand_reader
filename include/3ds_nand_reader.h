@@ -13,7 +13,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define BUFF_SIZE 4096
+#define BUFF_SIZE	4096
+#define NCSD		0x4453434e
 
 #define YELLOW "\033[33m"
 #define GREEN "\033[32m"
