@@ -1,5 +1,7 @@
 #include "../include/3ds_nand_reader.h"
 
+bool	g_debug = 1;
+
 char	*concat(char *s1, char *s2)
 {
 	auto char	*result = calloc(strlen(s1) + strlen(s2) + 1, sizeof(char));
@@ -29,6 +31,8 @@ char	*seekDevice(void)
 			block_name = st_directory->d_name;
 		}
 	}
+    if (!block_name)
+        errx(EXIT_FAILURE, "\033[31m3ds not found !\033[0m");
 	return (block_name);
 }
 
@@ -60,15 +64,20 @@ ssize_t	getNandSize(int fd_device)
 {
 	ssize_t	nandSize = 0;
 
-	if (lseek(fd_device, (off_t)0, SEEK_SET) == -1) // Be sure we are at file start
-		err(EXIT_FAILURE, "lseek");
+	/*if ((nandSize = lseek(fd_device, (off_t)0, SEEK_SET)) == -1) // Be sure we are at file start*/
+		/*err(EXIT_FAILURE, "lseek");*/
+	/*if (g_debug == 1)*/
+		/*printf("%sDEBUG => Nand size = %d <= DEBUG%s\n", B_RED, nandSize, END);*/
 
-	nandSize = lseek(fd_device, 0, SEEK_END); // Go to end of file to get size
+	nandSize = lseek(fd_device, (off_t)0, SEEK_END); // Go to end of file to get size
+	if (g_debug == 1)
+		printf("%sDEBUG => Nand size = %d <= DEBUG%s\n", B_RED, nandSize, END);
 	if (nandSize == -1)
 		err(EXIT_FAILURE, "lseek");
 
 	if (lseek(fd_device, (off_t)0, SEEK_SET) == -1) // return to start file
 		err(EXIT_FAILURE, "lseek");
+	sleep(10);
 
 	return (nandSize);
 }
@@ -112,6 +121,7 @@ bool	dumpNand(char *device, uint8_t nbDump)
 			printf("%sBytes left : %lu                 \r%s", GREEN, nandSize, END);
 			fflush(stdout);
 			size = read(fd_device, &buff, (ssize_t)BUFF_SIZE);
+			printf("size = %d\n", size);
 			if (size == -1)
 				err(EXIT_FAILURE, "read");
 			if (write(fd_file, &buff, (size_t)size) == -1)
@@ -119,7 +129,9 @@ bool	dumpNand(char *device, uint8_t nbDump)
 			nandSize -= size;
 		}
 		i == 0 ? printf("\n%sNand1 dump Success\n\n%s", GREEN, END):printf("\n%sNand2 dump Success\n\n%s", GREEN, END);
+		close(fd_file);
 	}
+	close(fd_device);
 	printf("%sFinish\n%s", GREEN, END);
 	return (true);
 }
