@@ -1,5 +1,8 @@
 
 # 3ds_nand_reader
+
+[![HitCount](http://hits.dwyl.io/SegFault42/https://github.com/SegFault42/3ds_nand_reader.svg)](http://hits.dwyl.io/SegFault42/https://github.com/SegFault42/3ds_nand_reader)
+
 This tool is provided to help you perform a `NAND dump` on your `3DS`
 
 <p align="center">
